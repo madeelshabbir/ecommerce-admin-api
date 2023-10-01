@@ -2,6 +2,7 @@ from app.models import Product, Sale
 from app.utils.database import SessionLocal
 from fastapi import APIRouter, Query
 from typing import Optional
+from sqlalchemy import func
 
 sales_router = APIRouter()
 
@@ -15,7 +16,14 @@ async def get_sales(
   category_id: Optional[str] = Query(None, description='Category ID for filtering sales data')
 ):
   db = SessionLocal()
-  query = db.query(Sale)
+  query = (
+    db.query(Sale.product_id,
+             Product.title,
+             Product.price,
+             func.sum(Sale.quantity).label('total_quantity'),
+             func.sum(Sale.quantity * Product.price).label('revenue'))
+    .join(Product, Sale.product_id == Product.id)
+  )
 
   if start_date:
     query = query.filter(Sale.created_at >= start_date)
@@ -30,6 +38,18 @@ async def get_sales(
   if category_id:
     query = query.join(Sale.product).filter(Product.category_id == category_id)
 
-  sales = query.all()
+  sales = query.group_by(Sale.product_id, Product.price).all()
   db.close()
-  return sales
+
+  response_data = [
+    {
+      'product_id': sale.product_id,
+      'product_title': sale.title,
+      'price': sale.price,
+      'total_quantity': sale.total_quantity,
+      'revenue': sale.revenue
+    }
+    for sale in sales
+  ]
+
+  return response_data
