@@ -1,7 +1,6 @@
+from app.routers import api_router
 from fastapi import FastAPI
 
 app = FastAPI()
 
-@app.get('/api/status')
-def read_root():
-    return {'message': 'Server is running'}
+app.include_router(api_router, prefix='/api')
