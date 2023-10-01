@@ -6,7 +6,7 @@ class Inventory(Base):
   __tablename__ = 'inventories'
 
   id = Column(Integer, primary_key=True, index=True)
-  stock_quantity = Column(Integer)
+  quantity = Column(Integer)
   updated_at = Column(DateTime)
   product_id = Column(Integer, ForeignKey('products.id'))
 
