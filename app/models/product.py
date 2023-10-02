@@ -1,6 +1,7 @@
-from app.utils.database import Base
+from app.models.inventory import Inventory
+from app.utils.database import Base, SessionLocal
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey, event
 from sqlalchemy.orm import relationship
 
 class Product(Base):
@@ -16,3 +17,13 @@ class Product(Base):
   sales = relationship('Sale', back_populates='product')
   inventory = relationship('Inventory', back_populates='product')
   category = relationship('Category', back_populates='products')
+
+@event.listens_for(Product, 'after_insert')
+def create_inventory(_, connection, target):
+  session = SessionLocal(bind=connection)
+  inventory = Inventory(
+    quantity=0,
+    product_id=target.id
+  )
+  session.add(inventory)
+  session.commit()
