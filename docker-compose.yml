@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    ports:
+      - 8000:8000
+    volumes:
+      - ./app:/var/www/ecommerce-admin-api/app
+    env_file: .env
+    stdin_open: true
+    tty: true
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - db
+    networks:
+      - api
+  db:
+    image: mysql:8.1
+    env_file: .env
+    ports:
+      - 3307:3306
+    volumes:
+      - db:/var/lib/mysql
+      - ./scripts/mysql:/docker-entrypoint-initdb.d/
+    networks:
+      - api
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  api:
+    driver: bridge
