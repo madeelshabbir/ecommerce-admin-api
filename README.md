@@ -1,6 +1,6 @@
 # Ecommerce Admin API
 
-- Ecommerce Admin API can power a web admin dashboard for e-commerce managers. This API should provide detailed insights into sales, revenue, and inventory status, as well as allow new product registration.
+Ecommerce Admin API can power a web admin dashboard for e-commerce managers. This API should provide detailed insights into sales, revenue, and inventory status, as well as allow new product registration.
 
 ## Technology
 
@@ -44,8 +44,33 @@ Copy `.env.example` to `.env`
 
       ip a
 
-### 3. Run the server
+### 3. Create Database
+
+- Run DB container
+
+      docker-compose up --build db
+
+- Open psql console
+
+      docker exec -it <CONTAINER NAME> mysql -u root -p
+
+- Run SQL query to create database
+
+      CREATE DATABASE ecommerce_db;
+      exit
+
+- Stop the continer.
+
+      docker stop <CONTAINER NAME>
+
+### 4. Run the server
 
 - Run following command and verify the server [status](http:localhost:8000/api/status)
 
       docker-compose up --build
+
+### 5. Perform seeding
+
+- Run seed script in app container
+
+      docker exec -it <CONTAINER NAME> python seed.py
