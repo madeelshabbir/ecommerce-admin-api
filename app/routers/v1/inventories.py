@@ -1,4 +1,5 @@
 from app.models import Product, Inventory
+from app.models.inventory_snap import InventorySnap
 from app.utils.database import SessionLocal
 from fastapi import APIRouter, HTTPException, Path, Query
 from pydantic import BaseModel
@@ -85,3 +86,12 @@ async def update_inventory(
   db.close()
 
   return inventory
+
+@inventories_router.get('/{id}/snaps')
+async def get_inventory_snaps(
+  id: int = Path(..., description='Inventory ID for retrieving the inventory snaps')
+):
+  db = SessionLocal()
+  inventory_snaps = db.query(InventorySnap).filter(InventorySnap.inventory_id == id).all()
+
+  return inventory_snaps
